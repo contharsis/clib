@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include "merge_sort.h"
 
-void merge(int *arr, int *arr2, int size, int i, int left, int right, int leftm, int rightm) {
+void merge(int arr[], int arr2[], int size, int i, int left, int right, int leftm, int rightm) {
 	for( ; left < leftm || right < rightm; i++) {
 		if(left < leftm && right < rightm) {
 			if(arr[left] < arr[right]) {
@@ -24,7 +24,7 @@ void merge(int *arr, int *arr2, int size, int i, int left, int right, int leftm,
 	}
 }
 
-void sort(int *arr, int size) {
+void merge_sort(int arr[], int size) {
 	int arr2[size];
 	
 	for(int i = 0; i < size; i++) {
@@ -40,19 +40,4 @@ void sort(int *arr, int size) {
 			merge(arr, arr2, size, (size / i) * i - i, (size / i) * i - i, (size / i) * i, (size / i) * i, size);
 		}
 	}
-}
-
-int main() {
-	int arr[] = {50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40};
-	int size = sizeof(arr) / sizeof(arr[0]);
-	
-	sort(arr, size);
-	
-	for(int i = 0; i < size; i++) {
-		printf("%d ", arr[i]);
-	}
-
-	printf("\n");
-
-	return 0;
 }
