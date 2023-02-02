@@ -1,29 +1,38 @@
-CFLAGS=-Wall -Wextra -Werror -pedantic -pedantic-errors
-DBGCFLAGS=-Wall -Wextra -Werror -pedantic -pedantic-errors -g -Og
-VFLAGS=-v -s --show-leak-kinds=all --leak-check=full --track-origins=yes
+rs ?= nl
+RSF = rs.txt
+RC = ./main $(args)
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -pedantic -pedantic-errors
+VFLAGS = -v -s --show-leak-kinds=all --leak-check=full --track-origins=yes
 
-LIBS=
-SLIBS=
+ifeq (dbg, $(findstring dbg, $(rs)))
+	CFLAGS += -g -Og
+endif
 
-run: main
-	./main $(args)
+ifeq (mem, $(findstring mem, $(rs)))
+	RC := valgrind $(RC)
+endif
 
-mem: main_dbg
-	valgrind $(VFLAGS) ./main_dbg $(args)
+FS =
 
-main: clear main.c $(LIBS)
-	gcc $(CFLAGS) -c main.c
-	gcc $(CFLAGS) main.o $(LIBS) -o main
+run: clear setup main
+	$(RC)
 
-main_dbg: clear main.c $(LIBS)
-	gcc $(DBGCFLAGS) -c main.c
-	gcc $(DBGCFLAGS) main.o $(LIBS) -o main_dbg
+setup:
+	@if [ -f "$(RSF)" ] && [ "$$(cat $(RSF))" != "$(rs)" ]; then \
+		rm main $(FS); \
+	fi
 
-$(LIBS): $(SLIBS)
-	gcc $(CFLAGS) -c $(SLIBS)
+	@echo "$(rs)" > $(RSF)
+
+main: $(FS)
+	$(CC) $(CFLAGS) $(FS) -o main
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $?
 
 clear:
 	clear
 
 clean:
-	rm main main_dbg main.o $(LIBS)
+	rm $(RSF) main $(FS)
