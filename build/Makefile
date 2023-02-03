@@ -1,38 +1,47 @@
-rs ?= nl
-RSF = rs.txt
-RC = ./main $(args)
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -pedantic -pedantic-errors
+VPATH = ../src:../lib
+CDIR = -I../src -I../lib
+SRCDIR =../src ../lib
 VFLAGS = -v -s --show-leak-kinds=all --leak-check=full --track-origins=yes
 
-ifeq (dbg, $(findstring dbg, $(rs)))
+RS ?= nl
+RSF = rs.txt
+OUT = main
+RC = ./$(OUT) $(args)
+
+ifeq (dbg, $(findstring dbg,$(RS)))
 	CFLAGS += -g -Og
 endif
 
-ifeq (mem, $(findstring mem, $(rs)))
-	RC := valgrind $(RC)
+ifeq (mem, $(findstring mem,$(RS)))
+	RC := valgrind $(VFLAGS) $(RC)
 endif
 
 FS =
+# FS = $(subst .c,.o,$(strip $(shell find $(SRCDIR) -type f -name '*.c' -printf '%f ')))
 
-run: clear setup main
+run: clear setup $(OUT)
 	$(RC)
 
 setup:
-	@if [ -f "$(RSF)" ] && [ "$$(cat $(RSF))" != "$(rs)" ]; then \
-		rm main $(FS); \
+	@if [ -f "$(RSF)" ] && [ "$$(cat $(RSF))" != "$(RS)" ]; then \
+		rm $(OUT) $(FS); \
 	fi
 
-	@echo "$(rs)" > $(RSF)
+	@echo "$(RS)" > $(RSF)
 
-main: $(FS)
-	$(CC) $(CFLAGS) $(FS) -o main
+$(OUT): $(FS)
+	$(CC) $(CFLAGS) $(FS) -o $(OUT)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $?
+	 $(CC) $(CFLAGS) $(CDIR) -c $^
+
+fs:
+	@echo "$(subst .c,.o,$(strip $(shell find $(SRCDIR) -type f -name '*.c' -printf '%f ')))"
 
 clear:
 	clear
 
 clean:
-	rm $(RSF) main $(FS)
+	rm $(RSF) $(OUT) $(FS)
