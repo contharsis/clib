@@ -1,8 +1,9 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -pedantic -pedantic-errors
-VPATH = ../src:../lib
-CDIR = -I../src -I../lib
-SRCDIR =../src ../lib
+FD = ../src ../lib
+VPATH = $(shell echo "$(FD)" | sed 's/\(.*\)[ ]/\1:/')
+CDIR = $(patsubst %,-I%,$(FD))
+SRCDIR = $(FD)
 VFLAGS = -v -s --show-leak-kinds=all --leak-check=full --track-origins=yes
 
 RS ?= nl
