@@ -1,2 +1,2 @@
 # clib
-general purpoise C library
+general purpose C library
